@@ -1,6 +1,6 @@
 # Maintainer: Roberto Flores <robert-flo>
 pkgname=ravn-webapps
-pkgver=1.1.5
+pkgver=1.1.6
 pkgrel=1
 pkgdesc='Universal web application launchers, icons and runtime launcher for the RaVN workstation'
 arch=('any')
@@ -19,7 +19,7 @@ source=(
   "${pkgname}-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz"
 )
 sha256sums=(
-  'a97fc75997b71b1a0ec64da995f46a08ff3a3175530ee1f61150372c8061e4b5'
+  'b29df8e80620c471ddb14752e3218d9fc45b798f0d1208515795b2ccfff32cc0'
 )
 
 package() {
