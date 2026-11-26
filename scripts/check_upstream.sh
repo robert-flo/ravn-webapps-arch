@@ -57,10 +57,16 @@ main() {
   require_command sha256sum
   [[ -f "$PKGBUILD_PATH" ]] || die "missing PKGBUILD: $PKGBUILD_PATH"
 
-  release_json="$(gh api "repos/$UPSTREAM_REPO/releases/latest")"
-  upstream_tag="$(jq -r '.tag_name // empty' <<< "$release_json")"
+  # GitHub releases can lag behind tags (v1.1.0/v1.1.1 existed before any
+  # release), so resolve the highest stable tag instead of releases/latest.
+  upstream_tag="$(
+    gh api "repos/$UPSTREAM_REPO/tags" --jq '.[].name' \
+      | grep -E '^v[0-9]+([.][0-9]+)*$' \
+      | sort -V \
+      | tail -n 1
+  )"
   [[ $upstream_tag =~ ^v([0-9]+([.][0-9]+)*)$ ]] \
-    || die "latest upstream release tag is not a stable vN.N version: ${upstream_tag:-<empty>}"
+    || die "no stable vN.N tag found in upstream: ${upstream_tag:-<empty>}"
   upstream_version="${BASH_REMATCH[1]}"
 
   archive_url="https://github.com/${UPSTREAM_REPO}/archive/refs/tags/${upstream_tag}.tar.gz"
