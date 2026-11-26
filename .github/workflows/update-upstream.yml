@@ -93,16 +93,18 @@ jobs:
           PKGREL: ${{ steps.update.outputs.pkgrel }}
         run: |
           set -Eeuo pipefail
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git add PKGBUILD .SRCINFO
+          # El step corre como root dentro del contenedor y el workspace es
+          # propiedad de builder; usar -C evita depender del cwd del runner.
+          git -C "$GITHUB_WORKSPACE" config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git -C "$GITHUB_WORKSPACE" add PKGBUILD .SRCINFO
 
-          if git diff --cached --quiet; then
+          if git -C "$GITHUB_WORKSPACE" diff --cached --quiet; then
             echo "No package metadata changed."
             exit 0
           fi
 
-          git -c user.name="github-actions[bot]" \
+          git -C "$GITHUB_WORKSPACE" -c user.name="github-actions[bot]" \
               -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
               commit -m "chore: update package to v${PKGVER}-${PKGREL}"
-          git pull --rebase origin "$GITHUB_REF_NAME"
-          git push origin "HEAD:$GITHUB_REF_NAME"
+          git -C "$GITHUB_WORKSPACE" pull --rebase origin "$GITHUB_REF_NAME"
+          git -C "$GITHUB_WORKSPACE" push origin "HEAD:$GITHUB_REF_NAME"
