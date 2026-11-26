@@ -1,0 +1,29 @@
+name: ci
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    steps:
+      - name: Install tools
+        run: |
+          set -Eeuo pipefail
+          pacman -Syu --noconfirm --needed git shellcheck
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate PKGBUILD, .SRCINFO and scripts
+        run: |
+          set -Eeuo pipefail
+          bash -n PKGBUILD scripts/*.sh
+          shellcheck -S warning scripts/*.sh
+          useradd --create-home builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+          su builder --shell /bin/bash --command "cd '$GITHUB_WORKSPACE' && makepkg --printsrcinfo" > /tmp/generated.SRCINFO
+          diff -u .SRCINFO /tmp/generated.SRCINFO

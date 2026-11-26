@@ -47,7 +47,7 @@ write_output() {
 }
 
 main() {
-  local release_json upstream_tag upstream_version archive_url
+  local upstream_tag upstream_version archive_url
   local current_pkgver current_checksum archive_checksum changed
   local archive_path
 
