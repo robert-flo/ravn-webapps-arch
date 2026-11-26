@@ -26,13 +26,20 @@ jobs:
         shell: bash
 
     steps:
+      # archlinux:base-devel no trae git. Si checkout corre antes de instalarlo,
+      # actions/checkout descarga un ZIP sin .git y el commit final es imposible.
+      - name: Install git for checkout
+        run: |
+          set -Eeuo pipefail
+          pacman -Syu --noconfirm --needed git
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install automation tooling
         run: |
           set -Eeuo pipefail
-          pacman -Syu --noconfirm --needed curl git github-cli jq
+          pacman -Syu --noconfirm --needed curl github-cli jq
 
       - name: Check latest stable upstream release
         id: check
